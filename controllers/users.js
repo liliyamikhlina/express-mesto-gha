@@ -12,7 +12,7 @@ module.exports.getUserById = (req, res) => {
   User.findById(userId)
     .then((user) => {
       if (!user) {
-        return res.status(404).send({ message: 'Запрашиваемый пользователь не найден' });
+        return res.status(404).send({ message: 'Пользователь по указанному _id не найден' });
       }
       return res.send({ data: user });
     })
@@ -30,7 +30,12 @@ module.exports.createUser = (req, res) => {
     name, about, avatar,
   })
     .then((user) => res.send({ data: user }))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя' });
+      }
+      return res.status(500).send({ message: err.message });
+    });
 };
 
 module.exports.updateUser = (req, res) => {
