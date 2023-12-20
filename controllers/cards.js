@@ -31,7 +31,12 @@ module.exports.deleteCard = (req, res) => {
       }
       return res.send({ data: card });
     })
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return res.status(400).send({ message: 'Переданы некорректные данные при удалении карточки' });
+      }
+      return res.status(500).send({ message: err.message });
+    });
 };
 
 module.exports.likeCard = (req, res) => {
