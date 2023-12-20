@@ -17,7 +17,10 @@ module.exports.getUserById = (req, res) => {
       return res.send({ data: user });
     })
     .catch((err) => {
-      res.status(500).send({ message: err.message });
+      if (err.name === 'CastError') {
+        return res.status(400).send({ message: 'Передан некорректный _id пользователя' });
+      }
+      return res.status(500).send({ message: err.message });
     });
 };
 
