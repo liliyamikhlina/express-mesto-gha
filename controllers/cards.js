@@ -15,7 +15,7 @@ module.exports.createCard = (req, res) => {
   Card.create({
     name, link, owner: req.user._id,
   })
-    .then((card) => res.status(201).json({ data: card }))
+    .then((user) => res.status(201).json({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return res.status(400).send({ message: 'Переданы некорректные данные при создании карточки' });
