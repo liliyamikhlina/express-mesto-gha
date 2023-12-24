@@ -74,3 +74,12 @@ module.exports.updateAvatar = (req, res) => {
       return res.status(500).send({ message: err.message });
     });
 };
+
+// module.exports.createUser = (req, res) => {
+//   User.create({
+//     email: req.body.email,
+//     password: req.body.password,
+//   })
+//     .then((user) => res.send(user))
+//     .catch((err) => res.status(400).send(err));
+// };
