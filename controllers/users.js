@@ -1,3 +1,4 @@
+const bcrypt = require('bcryptjs');
 const User = require('../models/user');
 
 module.exports.getUsers = (req, res) => {
@@ -26,11 +27,12 @@ module.exports.getUserById = (req, res) => {
 
 module.exports.createUser = (req, res) => {
   const {
-    name, about, avatar,
+    name, about, avatar, email, password
   } = req.body;
 
+  
   User.create({
-    name, about, avatar,
+    name, about, avatar, email, password
   })
     .then((user) => res.status(201).json({ data: user }))
     .catch((err) => {

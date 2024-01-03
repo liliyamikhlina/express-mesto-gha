@@ -23,13 +23,17 @@ const userSchema = new mongoose.Schema({
     },
     email: {
       type: String,
-      required: true,
+      required: [true, 'Поле "email" должно быть заполнено'],
       unique: true,
+      validate: {
+        validator: (v) => validator.isEmail(v),
+        message: 'Некорректный email',
+      },
     },
     password: {
       type: String,
-      required: true,
-      minlength: 8,
+      required: [true, 'Поле "password" должно быть заполнено'],
+      minlength: [8, 'Минимальная длина поля "password" - 8'],
     },
   },
 }, { versionKey: false });
