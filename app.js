@@ -2,6 +2,7 @@ const express = require('express');
 const helmet = require('helmet');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
+const { login } = require('./controllers/users');
 
 const { PORT = 3000 } = process.env;
 
@@ -16,6 +17,8 @@ mongoose.connect('mongodb://localhost:27017/mestodb');
 app.get('/', (req, res) => {
   res.send('Добро пожаловать на сервер!');
 });
+
+app.post('/signin', login);
 
 app.use((req, res, next) => {
   req.user = {
