@@ -47,11 +47,9 @@ module.exports.createUser = (req, res) => {
     .then((user) => res.status(201).json({ data: user }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res
-          .status(400)
-          .send({
-            message: 'Переданы некорректные данные при создании пользователя',
-          });
+        return res.status(400).send({
+          message: 'Переданы некорректные данные при создании пользователя',
+        });
       }
       return res.status(500).send({ message: err.message });
     });
@@ -74,11 +72,9 @@ module.exports.updateUser = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res
-          .status(400)
-          .send({
-            message: 'Переданы некорректные данные при обновлении профиля',
-          });
+        return res.status(400).send({
+          message: 'Переданы некорректные данные при обновлении профиля',
+        });
       }
       return res.status(500).send({ message: err.message });
     });
@@ -93,9 +89,7 @@ module.exports.updateAvatar = (req, res) => {
   )
     .then((user) => {
       if (!user) {
-        return res
-          .status(404)
-          .send({ message: 'Пользователь с указанным _id не найден' });
+        return res.status(404).send({ message: 'Пользователь с указанным _id не найден' });
       }
       return res.send({ data: user });
     })
@@ -114,10 +108,31 @@ module.exports.login = (req, res) => {
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
-      const token = jwt.sign({ _id: user._id }, 'secret-key', { expiresIn: '7d' });
+      const token = jwt.sign({ _id: user._id }, 'secret-key', {
+        expiresIn: '7d',
+      });
       res.send({ token });
     })
     .catch((err) => {
       res.status(401).send({ message: err.message });
+    });
+};
+
+module.exports.getCurrentUser = (req, res) => {
+  const userId = req.user._id;
+  User.findById(userId)
+    .then((user) => {
+      if (!user) {
+        return res.status(404).send({ message: 'Пользователь не найден' });
+      }
+      return res.send({ data: user });
+    })
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        return res.status(400).send({
+          message: 'Переданы некорректные данные',
+        });
+      }
+      return res.status(500).send({ message: err.message });
     });
 };
