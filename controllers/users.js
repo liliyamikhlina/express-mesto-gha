@@ -42,8 +42,13 @@ module.exports.createUser = (req, res) => {
     });
   }
 
-  bcrypt
-    .hash(password, 10)
+  User.findOne({ email })
+    .then((existingUser) => {
+      if (existingUser) {
+        return res.status(409).send({ message: 'Пользователь с таким email уже зарегистрирован' });
+      }
+      return bcrypt.hash(password, 10);
+    })
     .then((hash) => User.create({
       name,
       about,
@@ -117,6 +122,11 @@ module.exports.updateAvatar = (req, res) => {
 
 module.exports.login = (req, res) => {
   const { email, password } = req.body;
+  if (!email || typeof email !== 'string') {
+    return res.status(400).send({
+      message: 'Поле "email" является обязательным и должно быть строкой',
+    });
+  }
 
   return User.findUserByCredentials(email, password)
     .then((user) => {
@@ -126,7 +136,7 @@ module.exports.login = (req, res) => {
 
       res
         .cookie('jwt', token, {
-          maxAge: 3600000,
+          maxAge: '7d',
           httpOnly: true,
         });
 
