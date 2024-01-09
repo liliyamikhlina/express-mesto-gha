@@ -30,10 +30,17 @@ module.exports.getUserById = (req, res) => {
     });
 };
 
+// eslint-disable-next-line consistent-return
 module.exports.createUser = (req, res) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
+
+  if (!password) {
+    return res.status(400).send({
+      message: 'Поле "password" является обязательным',
+    });
+  }
 
   bcrypt
     .hash(password, 10)
@@ -44,7 +51,12 @@ module.exports.createUser = (req, res) => {
       email,
       password: hash,
     }))
-    .then((user) => res.status(201).json({ data: user }))
+    .then((user) => res.status(201).json({
+      name: user.name,
+      about: user.about,
+      avatar: user.avatar,
+      email: user.email,
+    }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         return res.status(400).send({
