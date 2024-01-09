@@ -29,17 +29,24 @@ module.exports.createCard = (req, res) => {
 };
 
 module.exports.deleteCard = (req, res) => {
+  const userId = req.user._id;
   if (!mongoose.Types.ObjectId.isValid(req.params.cardId)) {
     return res
       .status(400)
       .send({ message: 'Переданы некорректные данные при удалении карточки' });
   }
+
   return Card.findByIdAndDelete(req.params.cardId)
     .then((card) => {
       if (!card) {
         return res
           .status(404)
           .send({ message: 'Карточка с указанным _id не найдена' });
+      }
+      if (card.owner.toString() !== userId) {
+        return res
+          .status(403)
+          .send({ message: 'Недостаточно прав для удаления этой карточки' });
       }
       return res.send({ data: card });
     })

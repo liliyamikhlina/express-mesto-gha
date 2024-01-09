@@ -4,16 +4,17 @@ const jwt = require('jsonwebtoken');
 module.exports = (req, res, next) => {
   const { cookie } = req.headers;
 
-  const token = cookie.split('; ').find((cookiePair) => cookiePair.split('=')[0] === 'jwt').split('=')[1];
-
-  if (!token) {
+  if (!cookie) {
     return res.status(401).send({ message: 'Необходима авторизация' });
   }
-  // if (!authorization || !authorization.startsWith('Bearer ')) {
-  //   return res.status(401).send({ message: 'Необходима авторизация' });
-  // }
 
-  // const token = authorization.replace('Bearer ', '');
+  const tokenPair = cookie.split('; ').find((cookiePair) => cookiePair.split('=')[0] === 'jwt');
+
+  if (!tokenPair) {
+    return res.status(401).send({ message: 'Необходима авторизация' });
+  }
+
+  const token = tokenPair.split('=')[1];
   let payload;
 
   try {

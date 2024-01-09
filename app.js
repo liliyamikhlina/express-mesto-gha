@@ -24,14 +24,6 @@ app.post('/signup', createUser);
 
 app.use(auth);
 
-// TODO: убрать
-// app.use((req, res, next) => {
-//   req.user = {
-//     _id: '65808ad9a97517538d172556',
-//   };
-//   next();
-// });
-
 app.use('/users', require('./routes/users'));
 app.use('/cards', require('./routes/cards'));
 
