@@ -36,9 +36,9 @@ module.exports.createUser = (req, res) => {
     name, about, avatar, email, password,
   } = req.body;
 
-  if (!password) {
+  if (typeof password !== 'string' || !password) {
     return res.status(400).send({
-      message: 'Поле "password" является обязательным',
+      message: 'Поле "password" является обязательным и должно быть строкой',
     });
   }
 
