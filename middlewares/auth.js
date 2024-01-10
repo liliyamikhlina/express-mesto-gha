@@ -1,18 +1,17 @@
 const jwt = require('jsonwebtoken');
-const Unauthorized = require('../errors/Unauthorized');
 
 // eslint-disable-next-line consistent-return
 module.exports = (req, res, next) => {
   const { cookie } = req.headers;
 
   if (!cookie) {
-    throw new Unauthorized('Необходима авторизация');
+    return res.status(401).send({ message: 'Необходима авторизация' });
   }
 
   const tokenPair = cookie.split('; ').find((cookiePair) => cookiePair.split('=')[0] === 'jwt');
 
   if (!tokenPair) {
-    throw new Unauthorized('Необходима авторизация');
+    return res.status(401).send({ message: 'Необходима авторизация' });
   }
 
   const token = tokenPair.split('=')[1];
@@ -21,7 +20,7 @@ module.exports = (req, res, next) => {
   try {
     payload = jwt.verify(token, 'secret-key');
   } catch (err) {
-    return new Unauthorized('Необходима авторизация');
+    return res.status(401).send({ message: 'Необходима авторизация' });
   }
 
   req.user = payload;

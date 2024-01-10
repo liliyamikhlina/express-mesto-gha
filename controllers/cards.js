@@ -10,7 +10,7 @@ module.exports.getCards = (req, res) => {
     .catch((err) => res.status(500).send({ message: err.message }));
 };
 
-module.exports.createCard = (req, res) => {
+module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
 
   Card.create({
@@ -21,13 +21,13 @@ module.exports.createCard = (req, res) => {
     .then((card) => res.status(201).json({ data: card }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return new BadRequest('Переданы некорректные данные при создании карточки');
+        return next(new BadRequest('Переданы некорректные данные при создании карточки'));
       }
       return res.status(500).send({ message: err.message });
     });
 };
 
-module.exports.deleteCard = (req, res) => {
+module.exports.deleteCard = (req, res, next) => {
   const userId = req.user._id;
   if (!mongoose.Types.ObjectId.isValid(req.params.cardId)) {
     throw new BadRequest('Переданы некорректные данные при удалении карточки');
@@ -39,7 +39,7 @@ module.exports.deleteCard = (req, res) => {
         throw new NotFound('Карточка с указанным _id не найдена');
       }
       if (card.owner.toString() !== userId) {
-        return new Forbidden('Недостаточно прав для удаления этой карточки');
+        return next(new Forbidden('Недостаточно прав для удаления этой карточки'));
       }
       return res.send({ data: card });
     })
@@ -48,7 +48,7 @@ module.exports.deleteCard = (req, res) => {
     });
 };
 
-module.exports.likeCard = (req, res) => {
+module.exports.likeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $addToSet: { likes: req.user._id } },
@@ -62,13 +62,13 @@ module.exports.likeCard = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return new BadRequest('Переданы некорректные данные для постановки лайка');
+        return next(new BadRequest('Переданы некорректные данные для постановки лайка'));
       }
       return res.status(500).send({ message: err.message });
     });
 };
 
-module.exports.dislikeCard = (req, res) => {
+module.exports.dislikeCard = (req, res, next) => {
   Card.findByIdAndUpdate(
     req.params.cardId,
     { $pull: { likes: req.user._id } },
@@ -82,7 +82,7 @@ module.exports.dislikeCard = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return new BadRequest('Переданы некорректные данные для снятия лайка');
+        return next(new BadRequest('Переданы некорректные данные для снятия лайка'));
       }
       return res.status(500).send({ message: err.message });
     });

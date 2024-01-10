@@ -12,7 +12,7 @@ module.exports.getUsers = (req, res) => {
     .catch((err) => res.status(500).send({ message: err.message }));
 };
 
-module.exports.getUserById = (req, res) => {
+module.exports.getUserById = (req, res, next) => {
   const { userId } = req.params;
 
   User.findById(userId)
@@ -24,13 +24,13 @@ module.exports.getUserById = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return new BadRequest('Передан некорректный _id пользователя');
+        return next(new BadRequest('Передан некорректный _id пользователя'));
       }
       return res.status(500).send({ message: err.message });
     });
 };
 
-module.exports.createUser = (req, res) => {
+module.exports.createUser = (req, res, next) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
@@ -56,15 +56,15 @@ module.exports.createUser = (req, res) => {
     }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw BadRequest('Переданы некорректные данные при создании пользователя');
+        throw new BadRequest('Переданы некорректные данные при создании пользователя');
       } else if (err.code === 11000) {
-        return Conflict('Пользователь с таким email уже существует');
+        return next(new Conflict('Пользователь с таким email уже существует'));
       }
       return res.status(500).send({ message: err.message });
     });
 };
 
-module.exports.updateUser = (req, res) => {
+module.exports.updateUser = (req, res, next) => {
   const { name, about } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
@@ -79,13 +79,13 @@ module.exports.updateUser = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return BadRequest('Переданы некорректные данные при обновлении профиля');
+        return next(new BadRequest('Переданы некорректные данные при обновлении профиля'));
       }
       return res.status(500).send({ message: err.message });
     });
 };
 
-module.exports.updateAvatar = (req, res) => {
+module.exports.updateAvatar = (req, res, next) => {
   const { avatar } = req.body;
   User.findByIdAndUpdate(
     req.user._id,
@@ -100,13 +100,13 @@ module.exports.updateAvatar = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return new BadRequest('Переданы некорректные данные при обновлении ');
+        return next(new BadRequest('Переданы некорректные данные при обновлении '));
       }
       return res.status(500).send({ message: err.message });
     });
 };
 
-module.exports.login = (req, res) => {
+module.exports.login = (req, res, next) => {
   const { email, password } = req.body;
 
   return User.findUserByCredentials(email, password)
@@ -122,10 +122,10 @@ module.exports.login = (req, res) => {
 
       res.send({ token });
     })
-    .catch((err) => new Unauthorized(err.message));
+    .catch((err) => next(new Unauthorized(err.message)));
 };
 
-module.exports.getCurrentUser = (req, res) => {
+module.exports.getCurrentUser = (req, res, next) => {
   const userId = req.user._id;
   User.findById(userId)
     .then((user) => {
@@ -136,7 +136,7 @@ module.exports.getCurrentUser = (req, res) => {
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return new BadRequest('Переданы некорректные данные');
+        return next(new BadRequest('Переданы некорректные данные'));
       }
       return res.status(500).send({ message: err.message });
     });
