@@ -24,7 +24,7 @@ const errorMiddleware = (err, req, res, next) => {
     statusCode = 403;
     errorMessage = err.message;
   }
-  res.status(statusCode).send({ error: errorMessage });
+  res.status(statusCode).send({ message: errorMessage });
   next();
 };
 

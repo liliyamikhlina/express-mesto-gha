@@ -39,8 +39,8 @@ app.use((req, res) => {
   res.status(404).send({ message: 'Данные по запросу не найдены' });
 });
 
-app.use(errorMiddleware);
-
 app.use(errors());
+
+app.use(errorMiddleware);
 
 app.listen(PORT);
