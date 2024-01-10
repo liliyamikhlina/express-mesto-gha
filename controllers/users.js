@@ -1,6 +1,10 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const User = require('../models/user');
+const NotFound = require('../errors/NotFound');
+const BadRequest = require('../errors/BadRequest');
+const Unauthorized = require('../errors/Unauthorized');
+const Conflict = require('../errors/Conflict');
 
 module.exports.getUsers = (req, res) => {
   User.find({})
@@ -14,32 +18,25 @@ module.exports.getUserById = (req, res) => {
   User.findById(userId)
     .then((user) => {
       if (!user) {
-        return res
-          .status(404)
-          .send({ message: 'Пользователь с указанным _id не найден' });
+        throw new NotFound('Пользователь с указанным _id не найден');
       }
       return res.send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'CastError') {
-        return res
-          .status(400)
-          .send({ message: 'Передан некорректный _id пользователя' });
+        return new BadRequest('Передан некорректный _id пользователя');
       }
       return res.status(500).send({ message: err.message });
     });
 };
 
-// eslint-disable-next-line consistent-return
 module.exports.createUser = (req, res) => {
   const {
     name, about, avatar, email, password,
   } = req.body;
 
   if (typeof password !== 'string' || !password) {
-    return res.status(400).send({
-      message: 'Поле "password" является обязательным и должно быть строкой',
-    });
+    throw new BadRequest('Поле "password" является обязательным и должно быть строкой');
   }
 
   bcrypt
@@ -59,9 +56,9 @@ module.exports.createUser = (req, res) => {
     }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(400).send({
-          message: 'Переданы некорректные данные при создании пользователя',
-        });
+        throw BadRequest('Переданы некорректные данные при создании пользователя');
+      } else if (err.code === 11000) {
+        return Conflict('Пользователь с таким email уже существует');
       }
       return res.status(500).send({ message: err.message });
     });
@@ -76,17 +73,13 @@ module.exports.updateUser = (req, res) => {
   )
     .then((user) => {
       if (!user) {
-        return res
-          .status(404)
-          .send({ message: 'Пользователь с указанным _id не найден' });
+        throw new NotFound('Пользователь с указанным _id не найден');
       }
       return res.send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(400).send({
-          message: 'Переданы некорректные данные при обновлении профиля',
-        });
+        return BadRequest('Переданы некорректные данные при обновлении профиля');
       }
       return res.status(500).send({ message: err.message });
     });
@@ -101,15 +94,13 @@ module.exports.updateAvatar = (req, res) => {
   )
     .then((user) => {
       if (!user) {
-        return res.status(404).send({ message: 'Пользователь с указанным _id не найден' });
+        throw new NotFound('Пользователь с указанным _id не найден');
       }
       return res.send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res
-          .status(400)
-          .send({ message: 'Переданы некорректные данные при обновлении ' });
+        return new BadRequest('Переданы некорректные данные при обновлении ');
       }
       return res.status(500).send({ message: err.message });
     });
@@ -124,17 +115,14 @@ module.exports.login = (req, res) => {
         expiresIn: '7d',
       });
 
-      res
-        .cookie('jwt', token, {
-          maxAge: 3600000,
-          httpOnly: true,
-        });
+      res.cookie('jwt', token, {
+        maxAge: 3600000,
+        httpOnly: true,
+      });
 
       res.send({ token });
     })
-    .catch((err) => {
-      res.status(401).send({ message: err.message });
-    });
+    .catch((err) => new Unauthorized(err.message));
 };
 
 module.exports.getCurrentUser = (req, res) => {
@@ -142,15 +130,13 @@ module.exports.getCurrentUser = (req, res) => {
   User.findById(userId)
     .then((user) => {
       if (!user) {
-        return res.status(404).send({ message: 'Пользователь не найден' });
+        throw new NotFound('Пользователь не найден');
       }
       return res.send({ data: user });
     })
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        return res.status(400).send({
-          message: 'Переданы некорректные данные',
-        });
+        return new BadRequest('Переданы некорректные данные');
       }
       return res.status(500).send({ message: err.message });
     });
