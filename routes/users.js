@@ -1,5 +1,5 @@
 const router = require('express').Router();
-const { celebrate, Joi, errors } = require('celebrate');
+const { celebrate, Joi } = require('celebrate');
 const {
   getUsers, getUserById, updateUser, updateAvatar, getCurrentUser,
 } = require('../controllers/users');
@@ -25,7 +25,5 @@ router.patch('/me/avatar', celebrate({
     avatar: Joi.string().regex(/^https?:\/\/(?:www\.)?[a-zA-Z0-9-._~:/?#[\]@!$&'()*+,;=]+#?/),
   }),
 }), updateAvatar);
-
-router.use(errors());
 
 module.exports = router;
