@@ -15,7 +15,7 @@ module.exports = (req, res, next) => {
     throw new Unauthorized('Необходима авторизация');
   }
 
-  const token = tokenPair.split('=')[1];
+  const token = req.cookies.jwt;
   let payload;
 
   try {
