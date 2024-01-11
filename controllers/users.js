@@ -9,7 +9,7 @@ const Conflict = require('../errors/Conflict');
 module.exports.getUsers = (req, res, next) => {
   User.find({})
     .then((users) => res.send({ data: users }))
-    .catch((err) => next(err));
+    .catch(next);
 };
 
 module.exports.getUserById = (req, res, next) => {
@@ -35,10 +35,6 @@ module.exports.createUser = (req, res, next) => {
     name, about, avatar, email, password,
   } = req.body;
 
-  if (typeof password !== 'string' || !password) {
-    throw new BadRequest('Поле "password" является обязательным и должно быть строкой');
-  }
-
   bcrypt
     .hash(password, 10)
     .then((hash) => User.create({
@@ -56,11 +52,11 @@ module.exports.createUser = (req, res, next) => {
     }))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        throw new BadRequest('Переданы некорректные данные при создании пользователя');
+        next(new BadRequest('Переданы некорректные данные при создании пользователя'));
       } else if (err.code === 11000) {
         return next(new Conflict('Пользователь с таким email уже существует'));
       }
-      return res.status(500).send({ message: err.message });
+      return next(err);
     });
 };
 
@@ -81,7 +77,7 @@ module.exports.updateUser = (req, res, next) => {
       if (err.name === 'ValidationError') {
         return next(new BadRequest('Переданы некорректные данные при обновлении профиля'));
       }
-      return res.status(500).send({ message: err.message });
+      return next(err);
     });
 };
 
@@ -98,7 +94,7 @@ module.exports.updateAvatar = (req, res, next) => {
       }
       return res.send({ data: user });
     })
-    .catch((err) => next(err));
+    .catch(next);
 };
 
 module.exports.login = (req, res, next) => {
@@ -129,5 +125,5 @@ module.exports.getCurrentUser = (req, res, next) => {
       }
       return res.send({ data: user });
     })
-    .catch((err) => next(err));
+    .catch(next);
 };

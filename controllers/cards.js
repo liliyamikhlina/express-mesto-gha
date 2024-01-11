@@ -6,7 +6,7 @@ const Forbidden = require('../errors/Forbidden');
 module.exports.getCards = (req, res, next) => {
   Card.find({})
     .then((cards) => res.send({ data: cards }))
-    .catch((err) => next(err));
+    .catch(next);
 };
 
 module.exports.createCard = (req, res, next) => {
@@ -18,7 +18,7 @@ module.exports.createCard = (req, res, next) => {
     owner: req.user._id,
   })
     .then((card) => res.status(201).json({ data: card }))
-    .catch((err) => next(err));
+    .catch(next);
 };
 
 module.exports.deleteCard = (req, res, next) => {
@@ -33,7 +33,7 @@ module.exports.deleteCard = (req, res, next) => {
       }
       return res.send({ data: card });
     })
-    .catch((err) => next(err));
+    .catch(next);
 };
 
 module.exports.likeCard = (req, res, next) => {
