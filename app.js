@@ -2,7 +2,7 @@ const express = require('express');
 const helmet = require('helmet');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const { celebrate, Joi, errors } = require('celebrate');
+const { celebrate, Joi, errors, isCelebrateError } = require('celebrate');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const errorMiddleware = require('./middlewares/errorMiddleware');
@@ -28,7 +28,15 @@ app.post('/signin', celebrate({
   }),
 }), login);
 
-app.post('/signup', createUser);
+app.post('/signup', celebrate({
+  body: Joi.object().keys({
+    name: Joi.string().min(2).max(30),
+    about: Joi.string().min(2).max(30),
+    avatar: Joi.string().regex(/^https?:\/\/(?:www\.)?[a-zA-Z0-9-._~:/?#[\]@!$&'()*+,;=]+#?/),
+    email: Joi.string().required().email(),
+    password: Joi.string().required(),
+  }),
+}), createUser);
 
 app.use(auth);
 
@@ -39,7 +47,15 @@ app.use((req, res) => {
   res.status(404).send({ message: 'Данные по запросу не найдены' });
 });
 
-app.use(errors());
+app.use((err, req, res, next) => {
+  if (isCelebrateError(err)) {
+    err.details.forEach((error) => {
+      console.log(error.message);
+      res.status(400).send({ message: error.message });
+    });
+  }
+  return next(err);
+});
 
 app.use(errorMiddleware);
 
