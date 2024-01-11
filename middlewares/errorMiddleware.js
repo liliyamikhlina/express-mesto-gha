@@ -25,7 +25,7 @@ const errorMiddleware = (err, req, res, next) => {
     errorMessage = err.message;
   } else {
     statusCode = 500;
-    errorMessage = 'На сервере произошла ошибка',
+    errorMessage = 'На сервере произошла ошибка';
   }
   res.status(statusCode).send({ message: errorMessage });
   next();

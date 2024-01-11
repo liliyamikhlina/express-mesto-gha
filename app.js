@@ -50,7 +50,6 @@ app.use((req, res) => {
 app.use((err, req, res, next) => {
   if (isCelebrateError(err)) {
     err.details.forEach((error) => {
-      console.log(error.message);
       res.status(400).send({ message: error.message });
     });
   }
