@@ -44,7 +44,7 @@ module.exports.deleteCard = (req, res, next) => {
       return res.send({ data: card });
     })
     .catch((err) => {
-      res.status(500).send({ message: err.message });
+      next(err);
     });
 };
 
