@@ -98,12 +98,7 @@ module.exports.updateAvatar = (req, res, next) => {
       }
       return res.send({ data: user });
     })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return next(new BadRequest('Переданы некорректные данные при обновлении аватара'));
-      }
-      return res.status(500).send({ message: err.message });
-    });
+    .catch((err) => next(err));
 };
 
 module.exports.login = (req, res, next) => {
@@ -134,10 +129,5 @@ module.exports.getCurrentUser = (req, res, next) => {
       }
       return res.send({ data: user });
     })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return next(new BadRequest('Переданы некорректные данные'));
-      }
-      return res.status(500).send({ message: err.message });
-    });
+    .catch((err) => next(err));
 };

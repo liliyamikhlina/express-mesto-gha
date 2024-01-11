@@ -1,13 +1,12 @@
-const mongoose = require('mongoose');
 const Card = require('../models/card');
 const BadRequest = require('../errors/BadRequest');
 const NotFound = require('../errors/NotFound');
 const Forbidden = require('../errors/Forbidden');
 
-module.exports.getCards = (req, res) => {
+module.exports.getCards = (req, res, next) => {
   Card.find({})
     .then((cards) => res.send({ data: cards }))
-    .catch((err) => res.status(500).send({ message: err.message }));
+    .catch((err) => next(err));
 };
 
 module.exports.createCard = (req, res, next) => {
@@ -19,20 +18,11 @@ module.exports.createCard = (req, res, next) => {
     owner: req.user._id,
   })
     .then((card) => res.status(201).json({ data: card }))
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        return next(new BadRequest('Переданы некорректные данные при создании карточки'));
-      }
-      return res.status(500).send({ message: err.message });
-    });
+    .catch((err) => next(err));
 };
 
 module.exports.deleteCard = (req, res, next) => {
   const userId = req.user._id;
-  if (!mongoose.Types.ObjectId.isValid(req.params.cardId)) {
-    throw new BadRequest('Переданы некорректные данные при удалении карточки');
-  }
-
   return Card.findByIdAndDelete(req.params.cardId)
     .then((card) => {
       if (!card) {
@@ -43,9 +33,7 @@ module.exports.deleteCard = (req, res, next) => {
       }
       return res.send({ data: card });
     })
-    .catch((err) => {
-      next(err);
-    });
+    .catch((err) => next(err));
 };
 
 module.exports.likeCard = (req, res, next) => {
@@ -64,7 +52,7 @@ module.exports.likeCard = (req, res, next) => {
       if (err.name === 'CastError') {
         return next(new BadRequest('Переданы некорректные данные для постановки лайка'));
       }
-      return res.status(500).send({ message: err.message });
+      return next(err);
     });
 };
 
@@ -84,6 +72,6 @@ module.exports.dislikeCard = (req, res, next) => {
       if (err.name === 'CastError') {
         return next(new BadRequest('Переданы некорректные данные для снятия лайка'));
       }
-      return res.status(500).send({ message: err.message });
+      return next(err);
     });
 };
