@@ -2,7 +2,7 @@ const express = require('express');
 const helmet = require('helmet');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
-const { celebrate, Joi, isCelebrateError } = require('celebrate');
+const { celebrate, Joi, errors } = require('celebrate');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const errorMiddleware = require('./middlewares/errorMiddleware');
@@ -47,14 +47,7 @@ app.use((req, res) => {
   res.status(404).send({ message: 'Данные по запросу не найдены' });
 });
 
-app.use((err, req, res, next) => {
-  if (isCelebrateError(err)) {
-    err.details.forEach((error) => {
-      res.status(400).send({ message: error.message });
-    });
-  }
-  return next(err);
-});
+app.use(errors());
 
 app.use(errorMiddleware);
 
