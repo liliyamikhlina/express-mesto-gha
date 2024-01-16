@@ -9,6 +9,7 @@ const auth = require('./middlewares/auth');
 const errorMiddleware = require('./middlewares/errorMiddleware');
 const NotFound = require('./errors/NotFound');
 const urlValidation = require('./constants/urlValidation');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const { PORT = 3000 } = process.env;
 
@@ -21,6 +22,8 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 mongoose.connect('mongodb://localhost:27017/mestodb');
+
+app.use(requestLogger);
 
 app.get('/', (req, res) => {
   res.send('Добро пожаловать на сервер!');
@@ -51,6 +54,8 @@ app.use('/cards', require('./routes/cards'));
 app.use('*', (req, res, next) => {
   next(new NotFound('Данные по запросу не найдены'));
 });
+
+app.use(errorLogger);
 
 app.use(errors());
 
